@@ -33,13 +33,11 @@ module serial_to_parallel
             accumulated_count <= 1'b1;
             parallel_data <= '0;
             parallel_valid <= '0;
-            //accumulated_data <= '0;
         end
         else begin
             if (serial_valid) begin 
                 parallel_data <= {serial_data, parallel_data[width-1:1]};
                 accumulated_count <= {accumulated_count[width-2:0], accumulated_count[width-1]};
-                //accumulated_count <= accumulated_count + 1;
             
                 if (accumulated_count[width-1]) begin
                     parallel_valid <= 1'b1;

@@ -53,4 +53,36 @@ module signed_or_unsigned_mul
   output [2 * n - 1:0] res
 );
 
+  //assign res = signed_mul ? ($signed(a) * $signed(b)) : (a * b) ;
+  logic [2 * n - 1:0]  res_stub;
+  assign res = res_stub;
+  always_comb
+    if (signed_mul)
+      res_stub = $signed(a) * $signed(b);
+    else 
+      res_stub = a * b;
+  
+
+
+
+
+  // logic [2 * n - 1:0]  res_stub;
+  // logic [n-1:0] a_mod, b_mod;
+  // logic sign;
+  // assign res = res_stub;
+  // always_comb begin
+  //   if (signed_mul) begin
+  //     sign = a[n-1] ^ b[n-1];
+
+  //     a_mod = a[n-1] ? ~(a[n-1:0]-1) : a[n-1:0];
+  //     b_mod = b[n-1] ? ~(b[n-1:0]-1) : b[n-1:0];
+
+  //     res_stub = a_mod*b_mod;
+  //     if (sign)
+  //       res_stub = (~res_stub + 1);
+  //   end
+  //   else  
+  //     res_stub = a * b;
+  // end
+
 endmodule
