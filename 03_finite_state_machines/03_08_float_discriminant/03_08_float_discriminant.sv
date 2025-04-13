@@ -95,13 +95,6 @@ module float_discriminant (
 
     assign err = ac4_err | ac_err | bb_err | sub_error;
 
-
-    // always_ff @ (posedge clk)
-    //     if (rst)
-    //         state <= idle;
-    //     else
-    //         state <= new_state;
-
     always_ff @(posedge clk)
         if (rst) begin
             bb_reg<='0;

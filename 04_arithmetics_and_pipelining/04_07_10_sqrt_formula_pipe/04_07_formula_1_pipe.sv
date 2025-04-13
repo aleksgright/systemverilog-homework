@@ -42,55 +42,65 @@ module formula_1_pipe
     // FPGA-Systems Magazine :: FSM :: Issue ALFA (state_0)
     // You can download this issue from https://fpga-systems.ru/fsm#state_0
     logic [2:0] isqrt_vld;
-    logic [15:0] isqrt_out [2:0];
+    //logic [15:0] isqrt_out [2:0];
+    logic [15:0] isqrt_a, isqrt_b, isqrt_c;
 
     isqrt isqrt1 (
-        .clk(clk),
-        .rst(rst),
+        .clk           (clk),
+        .rst           (rst),
 
-        .x_vld(arg_vld),
-        .x(a),
+        .x_vld     (arg_vld),
+        .x               (a),
 
         .y_vld(isqrt_vld[0]),
-        .y(isqrt_out[0])
+        .y         (isqrt_a)
     );
 
     isqrt isqrt2 (
-        .clk(clk),
-        .rst(rst),
+        .clk           (clk),
+        .rst           (rst),
 
-        .x_vld(arg_vld),
-        .x(b),
+        .x_vld     (arg_vld),
+        .x               (b),
 
         .y_vld(isqrt_vld[1]),
-        .y(isqrt_out[1])
+        .y         (isqrt_b)
     ); 
 
     isqrt isqrt3 (
-        .clk(clk),
-        .rst(rst),
+        .clk           (clk),
+        .rst           (rst),
 
-        .x_vld(arg_vld),
-        .x(c),
+        .x_vld     (arg_vld),
+        .x               (c),
 
         .y_vld(isqrt_vld[2]),
-        .y(isqrt_out[2])
+        .y         (isqrt_c)
     );
+    
+    logic [31:0] res_comb;
+    logic res_vld_comb;
+    logic [31:0] sum_sqrt;
+    assign sum_sqrt = isqrt_a + isqrt_b + isqrt_c;
 
     always_ff @(posedge clk) 
         if (rst)
-            res<='0;
+            res_comb<='0;
         else
             if (&isqrt_vld)
-                res <= isqrt_out[0] + isqrt_out[1] + isqrt_out[2];
+                res_comb <= sum_sqrt;
     
 
     always_ff @(posedge clk) 
         if (rst)
-            res_vld<='0;
+            res_vld_comb<='0;
         else
-            res_vld <= &isqrt_vld;
+            if (&isqrt_vld)
+                res_vld_comb <= '1;
+            else
+                res_vld_comb <= '0;
+
+    assign res_vld = res_vld_comb;
+    assign res = res_comb;
          
-
-
 endmodule

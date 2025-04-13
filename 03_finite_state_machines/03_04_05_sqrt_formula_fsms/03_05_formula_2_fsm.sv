@@ -47,8 +47,6 @@ module formula_2_fsm
 
     logic res_written = 0;
 
-    //logic [31:0] tmp;
-
     //------------------------------------------------------------------------
     // Next state and isqrt interface
 

@@ -43,5 +43,93 @@ module sqrt_formula_distributor
     // Instantiate sufficient number of "formula_1_impl_1_top", "formula_1_impl_2_top",
     // or "formula_2_top" modules to achieve desired performance.
 
+    localparam N = 50;
+
+    logic [6:0] counter;
+    logic [95:0] abc_array [0:N-1];
+    logic [N-1:0] abc_vld_array;
+
+    logic [31:0] res_array [0:N-1];
+    logic [N-1:0] res_vld_array;
+
+    genvar i;
+    generate
+        for(i=0; i < N; i++)     
+            if (formula == 1)
+                if (impl == 1)
+                    formula_1_impl_1_top formula_top_i (
+                        .clk(clk),
+                        .rst(rst),
+
+                        .arg_vld(abc_vld_array[i]),
+                        .a(abc_array[i][31:0]),
+                        .b(abc_array[i][63:32]),
+                        .c(abc_array[i][95:64]),
+
+                        .res_vld(res_vld_array[i]),
+                        .res(res_array[i])
+                    );
+                else
+                    formula_1_impl_2_top formula_top_i (
+                        .clk(clk),
+                        .rst(rst),
+
+                        .arg_vld(abc_vld_array[i]),
+                        .a(abc_array[i][31:0]),
+                        .b(abc_array[i][63:32]),
+                        .c(abc_array[i][95:64]),
+
+                        .res_vld(res_vld_array[i]),
+                        .res(res_array[i])
+                    );
+            else
+                formula_2_top formula_top_i (
+                        .clk(clk),
+                        .rst(rst),
+
+                        .arg_vld(abc_vld_array[i]),
+                        .a(abc_array[i][31:0]),
+                        .b(abc_array[i][63:32]),
+                        .c(abc_array[i][95:64]),
+
+                        .res_vld(res_vld_array[i]),
+                        .res(res_array[i])
+                    );
+    endgenerate
+
+    
+
+    always_ff @(posedge clk)
+        if (rst)
+            counter <= '0;
+        else
+            if (arg_vld)
+                counter <= (counter == N-1) ? 0 : (counter + 1'b1);
+
+    always_ff @(posedge clk)
+        if(rst)
+            abc_vld_array <= N'(0);
+        else 
+            for (int j = 0; j < N; j++) 
+                if (j==counter)
+                    abc_vld_array[j] <= arg_vld;
+                else
+                    abc_vld_array[j] <= '0;
+
+    always_ff @(posedge clk)
+        for (int j = 0; j<N; j++)
+            if (arg_vld && j == counter) begin
+                abc_array[j][31:0] <= a;
+                abc_array[j][63:32] <= b;
+                abc_array[j][95:64] <= c;
+            end
+
+    logic [31:0] res_comb;
+    assign res_vld = |res_vld_array;
+    assign res = res_comb;
+    always_comb
+        for (int j = 0; j < N; j++)
+            if (res_vld_array[j])
+                res_comb = res_array[j];
 
 endmodule

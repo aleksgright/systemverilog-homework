@@ -30,5 +30,62 @@ module put_in_order
     // The idea of the block is kinda similar to the "parallel_to_serial" block
     // from Homework 2, but here block should also preserve the output order.
 
+    logic [$clog2(n_inputs)-1:0] counter;
+
+    logic [width-1:0] data_array [0:n_inputs-1];
+    logic [n_inputs-1:0] vld_array;
+    logic [n_inputs-1:0] present;
+
+    logic [width-1:0] look_ahead;
+    logic [width-1:0] res_comb;
+    assign down_data = res_comb;
+
+    logic res_vld_comb;
+    assign down_vld = res_vld_comb;
+
+    always_comb 
+        for (int j = 0; j < n_inputs; j++)
+            if (counter == j) begin
+                if (vld_array[j])
+                    res_comb = data_array[j];
+                else if (up_vlds[j])
+                    res_comb = up_data[j];
+            end
+
+    always_comb 
+        for (int j = 0; j < n_inputs; j++)
+            if (counter == j) 
+                res_vld_comb =vld_array[j] | up_vlds[j];
+            
+    
+
+    always_ff @(posedge clk)
+        if (rst)
+            vld_array <= n_inputs'(0);
+        else 
+            for (int j = 0; j < n_inputs; j++)
+                if (j==counter&&vld_array[j]) 
+                    vld_array[j]<=up_vlds[j];
+                else if (j == counter)
+                    vld_array[j] <= '0;
+                else
+                    if (up_vlds[j])
+                        vld_array[j] <= up_vlds[j];
+
+    always_ff @(posedge clk)
+        for (int j = 0; j < n_inputs; j++)
+            if (j==counter&&vld_array[j]) 
+                data_array[j]<=up_data[j];
+            else if (j != counter)
+                if (up_vlds[j])
+                    data_array[j] <= up_data[j];
+        
+    always_ff @(posedge clk) 
+        if (rst)
+            counter <= '0;
+        else
+            if (down_vld)
+                counter <= (counter == n_inputs-1) ? 0 : (counter + 1);
+    
 
 endmodule
